@@ -1,0 +1,7 @@
+{
+  "Prod": {
+    "StartAccountId": "075969481580",
+    "StartUrl": "https://NAME.awsapps.com/start",
+    "Region": "ap-southeast-2"
+  }
+}
