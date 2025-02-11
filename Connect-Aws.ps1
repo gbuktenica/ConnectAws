@@ -89,7 +89,7 @@ $Params = @{
     StartUrl           = $StartUrl
     Region             = $Region
     SSORegion          = $Region
-    RoleName           = 'global.vmcontributor'
+    RoleName           = 'AWSAdministorAccess'
     RegistrationScopes = "sso:account:access"
     SessionName        = "sso-session"
 }
