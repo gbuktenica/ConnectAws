@@ -38,13 +38,24 @@ function Import-Dependencies {
         $SaveVerbosePreference
     )
     foreach ($Module in $Modules) {
-        if (-not (Get-Module -ListAvailable -Name $Module -Verbose:$false)) {
-            Write-Output "Installing module $Module"
-            $global:VerbosePreference = 'SilentlyContinue'
-            Install-Module -Name $Module -ErrorAction Stop -Verbose:$false -Scope CurrentUser -Force -AllowClobber | Out-Null
-            $global:VerbosePreference = $SaveVerbosePreference
+        if (($Module.Contains( "AWS")) -and -not($Module.Contains( "AWS.Tools.Installer"))) {
+            if (-not (Get-Module -ListAvailable -Name $Module -Verbose:$false)) {
+                Write-Output "Installing module $Module"
+                $global:VerbosePreference = 'SilentlyContinue'
+                Install-Module -Name $Module -ErrorAction Stop -Verbose:$false -Scope CurrentUser -Force -AllowClobber | Out-Null
+                $global:VerbosePreference = $SaveVerbosePreference
+            } else {
+                Write-Verbose "Module $Module already installed."
+            }
         } else {
-            Write-Verbose "Module $Module already installed."
+            if (-not (Get-Module -ListAvailable -Name $Module -Verbose:$false)) {
+                Write-Output "Installing module $Module"
+                $global:VerbosePreference = 'SilentlyContinue'
+                Install-AWSToolsModule -Name $Module -CleanUp -Confirm:$false
+                $global:VerbosePreference = $SaveVerbosePreference
+            } else {
+                Write-Verbose "Module $Module already installed."
+            }
         }
     }
 
@@ -80,8 +91,7 @@ $StartUrl = $JsonParameters.$Environment.StartUrl
 $Region = $JsonParameters.$Environment.Region
 
 Import-Dependencies -Modules @("AWS.Tools.Installer") -SaveVerbosePreference $global:VerbosePreference
-Install-AWSToolsModule AWS.Tools.EC2, AWS.Tools.S3, AWS.Tools.Common -CleanUp -Confirm:$false
-#Import-Dependencies -Modules @("AWS.Tools.Common") -SaveVerbosePreference $global:VerbosePreference
+Import-Dependencies -Modules @("AWS.Tools.EC2", "AWS.Tools.S3", "AWS.Tools.Common") -SaveVerbosePreference $global:VerbosePreference
 
 $Params = @{
     ProfileName        = $Environment
@@ -89,7 +99,7 @@ $Params = @{
     StartUrl           = $StartUrl
     Region             = $Region
     SSORegion          = $Region
-    RoleName           = 'AWSAdministorAccess'
+    RoleName           = "AWSAdministratorAccess"
     RegistrationScopes = "sso:account:access"
     SessionName        = "sso-session"
 }
